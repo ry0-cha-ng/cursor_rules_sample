@@ -1,3 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
 --- 
 description: "アーキテクチャ・状態管理・テスト・データベース（ストア・API・テストファイル対象）"
 globs: ["src/store/**/*", "src/hooks/**/*", "src/api/**/*", "src/**/*.test.*", "src/**/__tests__/**/*"]
@@ -28,10 +33,9 @@ auto_apply: true
 - フック内の状態変更で無限ループが発生しないよう依存配列に注意
 
 ## テスト
-- JestとReact Testing Libraryを使ってコンポーネントのユニットテストを実装
-- 重要なユーザーフローには統合テストを実装
-- スナップショットテストを適切に使用
-- テストファイルは対象ファイルと同じディレクトリまたは `__tests__` ディレクトリに配置
+- テスト実装については **06_testing.mdc** を参照してください
+- t-wadaのTDDプラクティスに従った体系的なテストケース生成を実施
+- テストファーストでRed-Green-Refactorサイクルを遵守
 
 ## データベース・API設計
 - Supabaseのクエリは必要最小限のデータのみ取得

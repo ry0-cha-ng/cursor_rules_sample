@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: "TailwindCSS・UI/UX・アクセシビリティ（UI関連ファイル対象）"
 globs: ["src/components/**/*", "src/pages/**/*", "**/*.css", "**/*.scss", "tailwind.config.js", "postcss.config.js"]
 tags: ["UI", "TailwindCSS", "アクセシビリティ", "レスポンシブ"]

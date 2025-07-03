@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: true
+---
+---
 description: "基本方針・プロセス・技術スタック（全ファイル対象）"
 globs: ["**/*"]
 tags: ["基本原則", "プロセス", "セキュリティ", "技術スタック"]

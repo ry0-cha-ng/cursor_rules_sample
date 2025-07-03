@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: true
+---
+---
 description: "国際化・ドキュメント・運用・保守性（全ファイル対象）"
 globs: ["**/*"]
 tags: ["国際化", "ドキュメント", "運用保守", "開発効率"]

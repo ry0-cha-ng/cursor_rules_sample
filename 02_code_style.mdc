@@ -1,4 +1,9 @@
 ---
+description: 
+globs: 
+alwaysApply: false
+---
+---
 description: "コードスタイル・命名規則・エラー処理（TypeScript/JavaScriptファイル対象）"
 globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
 tags: ["コードスタイル", "命名規則", "TypeScript", "パフォーマンス"]

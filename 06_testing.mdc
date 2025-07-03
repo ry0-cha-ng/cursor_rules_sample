@@ -1,0 +1,289 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: "t-wadaのTDDプラクティスに従ったテストケース生成（テストファイル対象）"
+globs: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx", "**/__tests__/**/*"]
+tags: ["TDD", "テスト", "品質保証", "t-wada", "Jest", "React Testing Library"]
+priority: 6
+auto_apply: true
+---
+
+このファイルを参照したら「t-wadaのTDD実践開始！」と言ってください。
+
+# t-wada TDD実践ガイドライン
+
+## 基本テスト環境
+- **テストフレームワーク**: Jest
+- **コンポーネントテスト**: React Testing Library
+- **カスタムフックテスト**: @testing-library/react-hooks
+- **テストファイル配置**: 対象ファイルと同じディレクトリまたは `__tests__` ディレクトリ
+- **テストファイル命名**: `*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`
+
+## 基本TDD原則
+- **Red-Green-Refactor サイクル**を必ず遵守する
+- **テストファースト開発**を徹底する
+- **小さな単位でのテスト**を心がける
+- **意図が明確な失敗をするテスト**を作成する
+
+## テストケース設計原則
+
+### 1. テストケースの三段階構造
+```typescript
+// Given-When-Then パターンを必ず使用
+describe('対象コンポーネント/関数', () => {
+  describe('特定の状況において', () => {
+    it('期待される動作をする', () => {
+      // Given (前提条件)
+      const given = setupTestData();
+      
+      // When (実行)
+      const result = targetFunction(given);
+      
+      // Then (検証)
+      expect(result).toBe(expected);
+    });
+  });
+});
+```
+
+### 2. テストケースの分類
+実装時は以下の分類で**必ず**テストケースを作成する：
+
+#### 正常系（Happy Path）
+- 期待される入力での正常動作
+- 典型的な使用ケース
+
+#### 異常系（Error Cases）
+- 不正な入力値での適切なエラーハンドリング
+- null/undefined の処理
+- 型違反の処理
+
+#### 境界値（Edge Cases）
+- 最小値・最大値
+- 空の配列・オブジェクト
+- 文字列の長さ制限
+
+#### 副作用（Side Effects）
+- 状態変更の検証
+- API呼び出しの確認
+- イベント発火の検証
+
+### 3. テストケース命名規則
+```typescript
+// ❌ 悪い例
+it('should work', () => {});
+
+// ✅ 良い例
+it('有効なemailアドレスの場合、バリデーションが通る', () => {});
+it('空の配列が渡された場合、デフォルト値を返す', () => {});
+it('APIエラーの場合、適切なエラーメッセージを表示する', () => {});
+```
+
+### 4. テストデータ管理
+```typescript
+// ファクトリーパターンを使用してテストデータを管理
+const createTestUser = (overrides = {}) => ({
+  id: 1,
+  name: 'テストユーザー',
+  email: 'test@example.com',
+  ...overrides
+});
+
+// Given 部分で使用
+const user = createTestUser({ email: 'invalid-email' });
+```
+
+## React コンポーネントテストガイドライン
+
+### 1. コンポーネントテストの基本構造
+```typescript
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { TestComponent } from './TestComponent';
+
+describe('TestComponent', () => {
+  // テストごとのクリーンアップ
+  afterEach(() => {
+    cleanup();
+  });
+
+  describe('初期表示において', () => {
+    it('指定されたpropsが正しく表示される', () => {
+      // Given
+      const props = { title: 'テストタイトル' };
+      
+      // When
+      render(<TestComponent {...props} />);
+      
+      // Then
+      expect(screen.getByText('テストタイトル')).toBeInTheDocument();
+    });
+  });
+
+  describe('ユーザー操作において', () => {
+    it('ボタンクリック時に適切なイベントが発火される', async () => {
+      // Given
+      const mockOnClick = jest.fn();
+      render(<TestComponent onClick={mockOnClick} />);
+      
+      // When
+      fireEvent.click(screen.getByRole('button'));
+      
+      // Then
+      await waitFor(() => {
+        expect(mockOnClick).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+});
+```
+
+### 2. カスタムフックのテスト
+```typescript
+import { renderHook, act } from '@testing-library/react';
+import { useCustomHook } from './useCustomHook';
+
+describe('useCustomHook', () => {
+  describe('初期状態において', () => {
+    it('適切な初期値を返す', () => {
+      // Given & When
+      const { result } = renderHook(() => useCustomHook());
+      
+      // Then
+      expect(result.current.value).toBe(null);
+      expect(result.current.loading).toBe(false);
+    });
+  });
+
+  describe('状態更新において', () => {
+    it('updateValue呼び出し時に状態が更新される', () => {
+      // Given
+      const { result } = renderHook(() => useCustomHook());
+      
+      // When
+      act(() => {
+        result.current.updateValue('new value');
+      });
+      
+      // Then
+      expect(result.current.value).toBe('new value');
+    });
+  });
+});
+```
+
+### 3. モックとスタブの適切な使用
+```typescript
+// API呼び出しのモック
+jest.mock('../api/userApi', () => ({
+  fetchUser: jest.fn(),
+}));
+
+// 外部ライブラリのモック
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: jest.fn(),
+}));
+
+describe('UserComponent', () => {
+  beforeEach(() => {
+    // 各テスト前にモックをリセット
+    jest.clearAllMocks();
+  });
+
+  it('ユーザー情報取得成功時、適切に表示される', async () => {
+    // Given
+    const mockUser = createTestUser();
+    (fetchUser as jest.Mock).mockResolvedValue(mockUser);
+    
+    // When
+    render(<UserComponent userId={1} />);
+    
+    // Then
+    await waitFor(() => {
+      expect(screen.getByText(mockUser.name)).toBeInTheDocument();
+    });
+  });
+});
+```
+
+## テスト実装の段階的アプローチ
+
+### 1. Red フェーズ
+- 失敗するテストを最初に作成
+- 実装すべき機能の仕様を明確化
+- 期待される動作を具体的に記述
+
+### 2. Green フェーズ
+- テストを通す最小限のコードを実装
+- 複雑な実装は避け、まずは動作することを優先
+- リファクタリングは次のフェーズで行う
+
+### 3. Refactor フェーズ
+- コードの品質向上
+- 重複の除去
+- 可読性の向上
+- **テストが壊れないことを確認**
+
+## 特定テスト種別のガイドライン
+
+### ユニットテスト
+- 単一の関数・メソッドに焦点を当てる
+- 外部依存は適切にモック化
+- 実行時間は高速に保つ
+
+### 統合テスト
+- 重要なユーザーフローをテスト
+- 複数のコンポーネント間の連携を検証
+- 実際のAPIエンドポイントとの統合テスト
+
+### スナップショットテスト
+- UIコンポーネントの意図しない変更を検出
+- 適切に使用し、不要なスナップショットは削除
+- 意味のある変更時は適切にスナップショットを更新
+
+## テストカバレッジ目標
+- **行カバレッジ**: 90%以上
+- **分岐カバレッジ**: 85%以上
+- **関数カバレッジ**: 95%以上
+- **重要な機能**: 100%
+
+## テストベストプラクティス
+
+### テストの独立性
+- 各テストは他のテストに依存しない
+- 共有状態は避け、各テストで必要なデータを準備
+- テストの実行順序に依存しない
+
+### 可読性の向上
+- テストケース名は実装内容ではなく、期待される動作を記述
+- AAA（Arrange-Act-Assert）パターンを使用
+- 複雑なセットアップは別関数に抽出
+
+### メンテナンス性
+- 重複するテストコードは共通化
+- テストユーティリティ関数を活用
+- 定期的な不要テストの削除
+
+## 継続的な品質向上
+- **テストコードレビュー**を必ず実施
+- **テストの実行時間**を定期的に監視
+- **不安定なテスト**は即座に修正
+- **テストの保守性**を常に意識
+
+## 実践チェックリスト
+
+### 実装前チェック
+- [ ] テストファーストでRed-Green-Refactorサイクルを実践
+- [ ] テストケースの分類（正常系・異常系・境界値・副作用）を確認
+- [ ] Given-When-Then構造を使用
+- [ ] テストデータファクトリーを準備
+
+### 実装後チェック
+- [ ] 全テストケースが通る
+- [ ] テストカバレッジが目標値を達成
+- [ ] テストケース名が期待動作を明確に表現
+- [ ] 不要なモックやスタブを削除
+- [ ] テストコードの可読性とメンテナンス性を確認
